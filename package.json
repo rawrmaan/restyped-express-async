@@ -1,0 +1,19 @@
+{
+  "name": "restyped-express-async",
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rawrmaan/restyped-express-async.git"
+  },
+  "author": "Arman Dezfuli-Arjomandi",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/rawrmaan/restyped-express-async/issues"
+  },
+  "homepage": "https://github.com/rawrmaan/restyped-express-async#readme"
+}
