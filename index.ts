@@ -1,21 +1,16 @@
 import * as express from 'express'
-import {RestypeBase, RestypeRoute} from 'restyped'
+import {RestypedBase, RestypedRoute} from 'restyped'
 
-interface TypedRequest<T extends RestypeRoute> extends express.Request {
+interface TypedRequest<T extends RestypedRoute> extends express.Request {
   body: T['body']
   params: T['params']
   query: T['query']
 }
 
-interface ReqResInterface {
-  Request: any
-  Response: any
-}
-
-interface RouteError {
-  isRouteError: true
+interface RouteStatus {
+  isThrownStatus: true
   status: number
-  message: string
+  data: any
 }
 
 type HTTPMethod =
@@ -27,14 +22,14 @@ type HTTPMethod =
   | 'DELETE'
   | 'OPTIONS'
 
-export function throwRouteError(error: Partial<RouteError>) {
+export function throwStatus(error: Partial<RouteStatus>) {
   throw {
     ...error,
-    isRouteError: true
-  } as RouteError
+    isThrownStatus: true
+  } as RouteStatus
 }
 
-export default function AsyncRouter<APIDef extends RestypeBase>(
+export default function AsyncRouter<APIDef extends RestypedBase>(
   app: express.Express
 ) {
   function createRoute(
@@ -51,10 +46,10 @@ export default function AsyncRouter<APIDef extends RestypeBase>(
     })
   }
 
-  return function createAsyncRoute<
+  const createAsyncRoute = function<
     Path extends keyof APIDef,
     Method extends HTTPMethod,
-    RouteDef extends RestypeRoute = APIDef[Path][Method]
+    RouteDef extends RestypedRoute = APIDef[Path][Method]
   >(
     path: Path,
     method: Method,
@@ -66,13 +61,86 @@ export default function AsyncRouter<APIDef extends RestypeBase>(
           res.send(result)
         })
         .catch(err => {
-          if (err.isRouteError) {
-            const routeErr: RouteError = err
-            res.status(routeErr.status || 500).send(routeErr.message)
+          if (err.isThrownStatus) {
+            const routeErr: RouteStatus = err
+            res.status(routeErr.status || 500).send(routeErr.data)
           } else {
             next(err)
           }
         })
     })
+  }
+
+  return {
+    route: createAsyncRoute,
+    get: function<
+      Path extends keyof APIDef,
+      RouteDef extends RestypedRoute = APIDef[Path]['GET']
+    >(
+      path: Path,
+      handler: (req: TypedRequest<RouteDef>) => Promise<RouteDef['response']>
+    ) {
+      return createAsyncRoute(path, 'GET', handler)
+    },
+
+    post: function<
+      Path extends keyof APIDef,
+      RouteDef extends RestypedRoute = APIDef[Path]['POST']
+    >(
+      path: Path,
+      handler: (req: TypedRequest<RouteDef>) => Promise<RouteDef['response']>
+    ) {
+      return createAsyncRoute(path, 'POST', handler)
+    },
+
+    put: function<
+      Path extends keyof APIDef,
+      RouteDef extends RestypedRoute = APIDef[Path]['PUT']
+    >(
+      path: Path,
+      handler: (req: TypedRequest<RouteDef>) => Promise<RouteDef['response']>
+    ) {
+      return createAsyncRoute(path, 'PUT', handler)
+    },
+
+    delete: function<
+      Path extends keyof APIDef,
+      RouteDef extends RestypedRoute = APIDef[Path]['DELETE']
+    >(
+      path: Path,
+      handler: (req: TypedRequest<RouteDef>) => Promise<RouteDef['response']>
+    ) {
+      return createAsyncRoute(path, 'DELETE', handler)
+    },
+
+    patch: function<
+      Path extends keyof APIDef,
+      RouteDef extends RestypedRoute = APIDef[Path]['PATCH']
+    >(
+      path: Path,
+      handler: (req: TypedRequest<RouteDef>) => Promise<RouteDef['response']>
+    ) {
+      return createAsyncRoute(path, 'PATCH', handler)
+    },
+
+    options: function<
+      Path extends keyof APIDef,
+      RouteDef extends RestypedRoute = APIDef[Path]['OPTIONS']
+    >(
+      path: Path,
+      handler: (req: TypedRequest<RouteDef>) => Promise<RouteDef['response']>
+    ) {
+      return createAsyncRoute(path, 'OPTIONS', handler)
+    },
+
+    head: function<
+      Path extends keyof APIDef,
+      RouteDef extends RestypedRoute = APIDef[Path]['HEAD']
+    >(
+      path: Path,
+      handler: (req: TypedRequest<RouteDef>) => Promise<RouteDef['response']>
+    ) {
+      return createAsyncRoute(path, 'HEAD', handler)
+    }
   }
 }
