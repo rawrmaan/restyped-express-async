@@ -17,7 +17,7 @@ type HTTPMethod =
   | 'OPTIONS'
 
 export default function AsyncRouter<APIDef extends RestypedBase>(
-  app: express.Express
+  app: express.Express | express.Router
 ) {
   function createMiddleware(
     path: string,
