@@ -1,7 +1,7 @@
-import * as express from 'express'
+import * as express from 'express-serve-static-core'
 import {RestypedBase, RestypedRoute} from 'restyped'
 
-interface TypedRequest<T extends RestypedRoute> extends express.Request {
+export interface TypedRequest<T extends RestypedRoute> extends express.Request {
   body: T['body']
   params: T['params']
   query: T['query']
