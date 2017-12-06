@@ -35,15 +35,14 @@ export default function AsyncRouter<APIDef extends RestypedBase>(
 
   const createAsyncRoute = function<
     Path extends keyof APIDef,
-    Method extends HTTPMethod,
-    RouteDef extends RestypedRoute = APIDef[Path][Method]
+    Method extends HTTPMethod
   >(
     path: Path,
     method: Method,
     handler: (
-      req: TypedRequest<RouteDef>,
+      req: TypedRequest<APIDef[Path][Method]>,
       res: express.Response
-    ) => Promise<RouteDef['response']>
+    ) => Promise<APIDef[Path][Method]['response']>
   ) {
     createMiddleware(path, method, (req, res, next) => {
       return handler(req, res)
@@ -55,72 +54,59 @@ export default function AsyncRouter<APIDef extends RestypedBase>(
   return {
     route: createAsyncRoute,
     use: app.use,
-    get: function<
-      Path extends keyof APIDef,
-      RouteDef extends RestypedRoute = APIDef[Path]['GET']
-    >(
+    get: function<Path extends keyof APIDef>(
       path: Path,
-      handler: (req: TypedRequest<RouteDef>) => Promise<RouteDef['response']>
+      handler: (
+        req: TypedRequest<APIDef[Path]['GET']>
+      ) => Promise<APIDef[Path]['GET']['response']>
     ) {
       return createAsyncRoute(path, 'GET', handler)
     },
-
-    post: function<
-      Path extends keyof APIDef,
-      RouteDef extends RestypedRoute = APIDef[Path]['POST']
-    >(
+    post: function<Path extends keyof APIDef>(
       path: Path,
-      handler: (req: TypedRequest<RouteDef>) => Promise<RouteDef['response']>
+      handler: (
+        req: TypedRequest<APIDef[Path]['POST']>
+      ) => Promise<APIDef[Path]['POST']['response']>
     ) {
       return createAsyncRoute(path, 'POST', handler)
     },
-
-    put: function<
-      Path extends keyof APIDef,
-      RouteDef extends RestypedRoute = APIDef[Path]['PUT']
-    >(
+    put: function<Path extends keyof APIDef>(
       path: Path,
-      handler: (req: TypedRequest<RouteDef>) => Promise<RouteDef['response']>
+      handler: (
+        req: TypedRequest<APIDef[Path]['PUT']>
+      ) => Promise<APIDef[Path]['PUT']['response']>
     ) {
       return createAsyncRoute(path, 'PUT', handler)
     },
-
-    delete: function<
-      Path extends keyof APIDef,
-      RouteDef extends RestypedRoute = APIDef[Path]['DELETE']
-    >(
+    delete: function<Path extends keyof APIDef>(
       path: Path,
-      handler: (req: TypedRequest<RouteDef>) => Promise<RouteDef['response']>
+      handler: (
+        req: TypedRequest<APIDef[Path]['DELETE']>
+      ) => Promise<APIDef[Path]['DELETE']['response']>
     ) {
       return createAsyncRoute(path, 'DELETE', handler)
     },
-
-    patch: function<
-      Path extends keyof APIDef,
-      RouteDef extends RestypedRoute = APIDef[Path]['PATCH']
-    >(
+    patch: function<Path extends keyof APIDef>(
       path: Path,
-      handler: (req: TypedRequest<RouteDef>) => Promise<RouteDef['response']>
+      handler: (
+        req: TypedRequest<APIDef[Path]['PATCH']>
+      ) => Promise<APIDef[Path]['PATCH']['response']>
     ) {
       return createAsyncRoute(path, 'PATCH', handler)
     },
-
-    options: function<
-      Path extends keyof APIDef,
-      RouteDef extends RestypedRoute = APIDef[Path]['OPTIONS']
-    >(
+    options: function<Path extends keyof APIDef>(
       path: Path,
-      handler: (req: TypedRequest<RouteDef>) => Promise<RouteDef['response']>
+      handler: (
+        req: TypedRequest<APIDef[Path]['OPTIONS']>
+      ) => Promise<APIDef[Path]['OPTIONS']['response']>
     ) {
       return createAsyncRoute(path, 'OPTIONS', handler)
     },
-
-    head: function<
-      Path extends keyof APIDef,
-      RouteDef extends RestypedRoute = APIDef[Path]['HEAD']
-    >(
+    head: function<Path extends keyof APIDef>(
       path: Path,
-      handler: (req: TypedRequest<RouteDef>) => Promise<RouteDef['response']>
+      handler: (
+        req: TypedRequest<APIDef[Path]['HEAD']>
+      ) => Promise<APIDef[Path]['HEAD']['response']>
     ) {
       return createAsyncRoute(path, 'HEAD', handler)
     }
