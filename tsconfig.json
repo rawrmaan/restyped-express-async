@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "outDir": "./build/",
+    "outDir": "./dist/",
     "alwaysStrict": true,
     "sourceMap": true,
     "noImplicitAny": true,
@@ -14,7 +14,8 @@
     "experimentalDecorators": true,
     "module": "commonjs",
     "moduleResolution": "node",
-    "suppressExcessPropertyErrors": true
+    "suppressExcessPropertyErrors": true,
+    "declaration": true
   },
   "exclude": ["node_modules"]
 }
