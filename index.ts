@@ -7,12 +7,6 @@ interface TypedRequest<T extends RestypedRoute> extends express.Request {
   query: T['query']
 }
 
-interface RouteStatus {
-  isThrownStatus: true
-  status: number
-  data: any
-}
-
 type HTTPMethod =
   | 'GET'
   | 'POST'
@@ -22,24 +16,17 @@ type HTTPMethod =
   | 'DELETE'
   | 'OPTIONS'
 
-export function throwStatus(error: Partial<RouteStatus>) {
-  throw {
-    ...error,
-    isThrownStatus: true
-  } as RouteStatus
-}
-
 export default function AsyncRouter<APIDef extends RestypedBase>(
   app: express.Express
 ) {
-  function createRoute(
+  function createMiddleware(
     path: string,
     method: HTTPMethod,
     handler: express.RequestHandler
   ) {
     app.use(path, (req, res, next) => {
       if (req.method === method) {
-        return handler(req, res, next)
+        handler(req, res, next)
       } else {
         next()
       }
@@ -53,21 +40,15 @@ export default function AsyncRouter<APIDef extends RestypedBase>(
   >(
     path: Path,
     method: Method,
-    handler: (req: TypedRequest<RouteDef>) => Promise<RouteDef['response']>
+    handler: (
+      req: TypedRequest<RouteDef>,
+      res: express.Response
+    ) => Promise<RouteDef['response']>
   ) {
-    createRoute(path, method, (req, res, next) => {
-      return handler(req)
-        .then((result: any) => {
-          res.send(result)
-        })
-        .catch(err => {
-          if (err.isThrownStatus) {
-            const routeErr: RouteStatus = err
-            res.status(routeErr.status || 500).send(routeErr.data)
-          } else {
-            next(err)
-          }
-        })
+    createMiddleware(path, method, (req, res, next) => {
+      return handler(req, res)
+        .then(res.send)
+        .catch(next)
     })
   }
 
