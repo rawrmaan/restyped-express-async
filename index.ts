@@ -24,7 +24,7 @@ export default function AsyncRouter<APIDef extends RestypedBase>(
     method: HTTPMethod,
     handler: express.RequestHandler
   ) {
-    app.use(path, (req, res, next) => {
+    app.use(path, function(req, res, next) {
       if (req.method === method) {
         handler(req, res, next)
       } else {
