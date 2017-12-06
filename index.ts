@@ -44,7 +44,7 @@ export default function AsyncRouter<APIDef extends RestypedBase>(
       res: express.Response
     ) => Promise<APIDef[Path][Method]['response']>
   ) {
-    createMiddleware(path, method, (req, res, next) => {
+    createMiddleware(path, method, function(req, res, next) {
       return handler(req, res)
         .then(res.send)
         .catch(next)
