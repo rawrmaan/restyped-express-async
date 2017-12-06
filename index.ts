@@ -73,6 +73,7 @@ export default function AsyncRouter<APIDef extends RestypedBase>(
 
   return {
     route: createAsyncRoute,
+    use: app.use,
     get: function<
       Path extends keyof APIDef,
       RouteDef extends RestypedRoute = APIDef[Path]['GET']
