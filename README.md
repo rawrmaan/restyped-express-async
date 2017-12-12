@@ -1,4 +1,4 @@
-# RESTyped Axios
+# RESTyped Express Wrapper
 
 Express route wrappers for declaring type-safe APIs with [RESTyped](https://github.com/rawrmaan/restyped). Also supports `async` route functions.
 
