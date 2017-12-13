@@ -18,7 +18,7 @@ const router = RestypedRouter<MyAPI>(app)
 
 // You'll get a compile error if you declare a route that doesn't exist in your API defintion.
 router.post('/login', async req => {
-  // Error if you try to access body keys that don't exist in your API definition.
+  // Error if you try to access body properties that don't exist in your API definition.
   const {username, password, twoFactorPin} = req.body
   //     ^ string  ^ string  ^ number
 
