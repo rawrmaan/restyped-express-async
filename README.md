@@ -33,7 +33,7 @@ router.post('/login', async req => {
 
 ### Error handling
 
-You can `throw` from inside your `async` function and it will return a 500 to the client.
+You can `throw` from inside your `async` function and your thrown error will be passed to `next(err)`.
 
 ### Status codes
 
