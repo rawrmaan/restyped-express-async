@@ -19,20 +19,6 @@ type HTTPMethod =
 export default function AsyncRouter<APIDef extends RestypedBase>(
   app: express.Express | express.Router
 ) {
-  function createMiddleware(
-    path: string,
-    method: HTTPMethod,
-    handler: express.RequestHandler
-  ) {
-    app.use(path, function(req, res, next) {
-      if (req.method === method) {
-        handler(req, res, next)
-      } else {
-        next()
-      }
-    })
-  }
-
   const createAsyncRoute = function<
     Path extends keyof APIDef,
     Method extends HTTPMethod
@@ -44,9 +30,14 @@ export default function AsyncRouter<APIDef extends RestypedBase>(
       res: express.Response
     ) => Promise<APIDef[Path][Method]['response']>
   ) {
-    createMiddleware(path, method, function(req, res, next) {
+    const route: express.IRouterMatcher<void> = app[method.toLowerCase()]
+    route(path, function(req, res, next) {
       return handler(req, res)
-        .then(result => res.send(result))
+        .then(result => {
+          if (!res.headersSent) {
+            res.send(result)
+          }
+        })
         .catch(err => next(err))
     })
   }
