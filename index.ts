@@ -7,6 +7,17 @@ export interface TypedRequest<T extends RestypedRoute> extends express.Request {
   query: T['query']
 }
 
+type Handler = (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) => void
+
+type TypedHandler<T extends RestypedRoute, Response> = (
+  req: TypedRequest<T>,
+  res: express.Response
+) => Promise<Response>
+
 type HTTPMethod =
   | 'GET'
   | 'POST'
@@ -25,21 +36,35 @@ export default function AsyncRouter<APIDef extends RestypedBase>(
   >(
     path: Path,
     method: Method,
-    handler: (
-      req: TypedRequest<APIDef[Path][Method]>,
-      res: express.Response
-    ) => Promise<APIDef[Path][Method]['response']>
+    handler: TypedHandler<
+      APIDef[Path][Method],
+      APIDef[Path][Method]['response']
+    >,
+    middlewares: Handler[]
   ) {
-    const route: express.IRouterMatcher<void> = app[method.toLowerCase()]
-    route(path, function(req, res, next) {
-      return handler(req, res)
-        .then(result => {
-          if (!res.headersSent) {
-            res.send(result)
-          }
-        })
-        .catch(err => next(err))
-    })
+    const handlers = [...middlewares]
+    handlers.push(
+      (
+        req: express.Request,
+        res: express.Response,
+        next: express.NextFunction
+      ) => {
+        handler(req, res)
+          .then(result => {
+            if (!res.headersSent) {
+              res.send(result)
+            }
+          })
+          .catch(err => {
+            next(err)
+          })
+      }
+    )
+
+    const route: express.IRouterMatcher<void> = app[method.toLowerCase()].bind(
+      app
+    )
+    route(path as string, handlers)
   }
 
   return {
@@ -47,66 +72,73 @@ export default function AsyncRouter<APIDef extends RestypedBase>(
     use: app.use.bind(app),
     get: function<Path extends keyof APIDef>(
       path: Path,
-      handler: (
-        req: TypedRequest<APIDef[Path]['GET']>,
-        res: express.Response
-      ) => Promise<APIDef[Path]['GET']['response']>
+      handler: TypedHandler<
+        APIDef[Path]['GET'],
+        APIDef[Path]['GET']['response']
+      >,
+      ...middlewares: Handler[]
     ) {
-      return createAsyncRoute(path, 'GET', handler)
+      return createAsyncRoute(path, 'GET', handler, middlewares)
     },
     post: function<Path extends keyof APIDef>(
       path: Path,
-      handler: (
-        req: TypedRequest<APIDef[Path]['POST']>,
-        res: express.Response
-      ) => Promise<APIDef[Path]['POST']['response']>
+      handler: TypedHandler<
+        APIDef[Path]['POST'],
+        APIDef[Path]['POST']['response']
+      >,
+      ...middlewares: Handler[]
     ) {
-      return createAsyncRoute(path, 'POST', handler)
+      return createAsyncRoute(path, 'POST', handler, middlewares)
     },
     put: function<Path extends keyof APIDef>(
       path: Path,
-      handler: (
-        req: TypedRequest<APIDef[Path]['PUT']>,
-        res: express.Response
-      ) => Promise<APIDef[Path]['PUT']['response']>
+      handler: TypedHandler<
+        APIDef[Path]['PUT'],
+        APIDef[Path]['PUT']['response']
+      >,
+      ...middlewares: Handler[]
     ) {
-      return createAsyncRoute(path, 'PUT', handler)
+      return createAsyncRoute(path, 'PUT', handler, middlewares)
     },
     delete: function<Path extends keyof APIDef>(
       path: Path,
-      handler: (
-        req: TypedRequest<APIDef[Path]['DELETE']>,
-        res: express.Response
-      ) => Promise<APIDef[Path]['DELETE']['response']>
+      handler: TypedHandler<
+        APIDef[Path]['DELETE'],
+        APIDef[Path]['DELETE']['response']
+      >,
+      ...middlewares: Handler[]
     ) {
-      return createAsyncRoute(path, 'DELETE', handler)
+      return createAsyncRoute(path, 'DELETE', handler, middlewares)
     },
     patch: function<Path extends keyof APIDef>(
       path: Path,
-      handler: (
-        req: TypedRequest<APIDef[Path]['PATCH']>,
-        res: express.Response
-      ) => Promise<APIDef[Path]['PATCH']['response']>
+      handler: TypedHandler<
+        APIDef[Path]['PATCH'],
+        APIDef[Path]['PATCH']['response']
+      >,
+      ...middlewares: Handler[]
     ) {
-      return createAsyncRoute(path, 'PATCH', handler)
+      return createAsyncRoute(path, 'PATCH', handler, middlewares)
     },
     options: function<Path extends keyof APIDef>(
       path: Path,
-      handler: (
-        req: TypedRequest<APIDef[Path]['OPTIONS']>,
-        res: express.Response
-      ) => Promise<APIDef[Path]['OPTIONS']['response']>
+      handler: TypedHandler<
+        APIDef[Path]['OPTIONS'],
+        APIDef[Path]['OPTIONS']['response']
+      >,
+      ...middlewares: Handler[]
     ) {
-      return createAsyncRoute(path, 'OPTIONS', handler)
+      return createAsyncRoute(path, 'OPTIONS', handler, middlewares)
     },
     head: function<Path extends keyof APIDef>(
       path: Path,
-      handler: (
-        req: TypedRequest<APIDef[Path]['HEAD']>,
-        res: express.Response
-      ) => Promise<APIDef[Path]['HEAD']['response']>
+      handler: TypedHandler<
+        APIDef[Path]['HEAD'],
+        APIDef[Path]['HEAD']['response']
+      >,
+      ...middlewares: Handler[]
     ) {
-      return createAsyncRoute(path, 'HEAD', handler)
+      return createAsyncRoute(path, 'HEAD', handler, middlewares)
     }
   }
 }
